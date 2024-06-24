@@ -1,20 +1,44 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
 
-export default function App() {
+import React, { useState } from 'react'
+// Import axios, BASE_URL, dan API_KEY
+import axios from 'axios'
+import { BASE_URL, API_KEY } from './src/constant'
+import { View, StyleSheet } from 'react-native'
+import WeatherSearch from './src/components/weatherSearch'
+import WeatherInfo from './src/components/weatherInfo'
+
+const App = () => {
+  const [weatherData, setWeatherData] = useState(null)
+
+  const searchWeather = (location) => {
+    axios
+      .get(`${BASE_URL}?q=${location}&appid=${API_KEY}`)
+      .then((response) => {
+        const data = response.data
+        data.visibility /= 1000
+        data.visibility = data.visibility.toFixed(2)
+        data.main.temp -= 273.15 
+        data.main.temp = data.main.temp.toFixed(2)
+        setWeatherData(data)
+        console.log(data)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
+      <WeatherSearch searchWeather={searchWeather} />
+      {weatherData && <WeatherInfo weatherData={weatherData} />}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 20,
   },
-});
+})
+
+export default App
